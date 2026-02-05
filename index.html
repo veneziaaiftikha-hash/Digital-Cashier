@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧁 Modern Cafe System 🍓</title>
+    <style>
+        :root {
+            --pink-pastel: #ffc2d1;
+            --pink-hot: #ff5c8a;
+            --cream: #fff9fb;
+            --white: #ffffff;
+            --text: #4a4a4a;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--cream); 
+            color: var(--text);
+            margin: 0; padding-bottom: 50px; 
+        }
+
+        /* NAVBAR MODERN */
+        .nav { 
+            background: var(--white); width: 100%; display: flex; justify-content: center; 
+            box-shadow: 0 2px 15px rgba(255, 92, 138, 0.1); position: sticky; top: 0; z-index: 100;
+            padding: 10px 0;
+        }
+        .nav button { 
+            background: none; border: 2px solid transparent; color: var(--pink-hot); 
+            padding: 10px 25px; cursor: pointer; font-size: 15px; font-weight: bold; 
+            transition: 0.3s; border-radius: 50px; margin: 0 5px;
+        }
+        .nav button.active { background: var(--pink-hot); color: white; }
+
+        /* PAGE CONTAINER */
+        .page { 
+            display: none; width: 90%; max-width: 600px; 
+            background: var(--white); margin: 30px auto; padding: 30px; 
+            border-radius: 40px; border: 4px solid var(--pink-pastel);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            position: relative; z-index: 1;
+        }
+        .active-page { display: block; animation: slideUp 0.4s ease-out; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: var(--pink-hot); text-align: center; font-size: 28px; letter-spacing: 3px; margin-bottom: 20px; }
+        h3 { color: var(--pink-hot); font-size: 18px; border-bottom: 2px dashed var(--pink-pastel); padding-bottom: 10px; margin-top: 25px; }
+
+        /* TABEL MINIMALIS */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { color: var(--pink-hot); padding: 10px; text-align: left; font-size: 13px; text-transform: uppercase; }
+        td { background: #fffcfd; padding: 15px; border-radius: 15px; border: 1px solid #fff0f3; }
+
+        /* TOMBOL LUCU */
+        .btn { 
+            padding: 10px 20px; border: none; border-radius: 50px; cursor: pointer; 
+            font-weight: bold; transition: 0.2s; font-size: 13px; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn-buy { background: var(--pink-hot); color: white; box-shadow: 0 4px 0 #d6336c; }
+        .btn-buy:active { transform: translateY(3px); box-shadow: 0 1px 0 #d6336c; }
+        .btn-owner { background: #a2d2ff; color: white; box-shadow: 0 4px 0 #74b9ff; }
+        .btn-reset { background: #eee; color: #888; }
+        
+        .habis { background: #f1f1f1 !important; color: #bbb; cursor: not-allowed; box-shadow: none; }
+
+        /* INPUT */
+        input { 
+            border: 2px solid var(--pink-pastel); border-radius: 15px; padding: 10px;
+            outline: none; transition: 0.3s; margin: 5px; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--pink-hot); }
+
+        /* MODAL & OVERLAY FIX */
+        .overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 2000; 
+        }
+        .modal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; padding: 30px; border-radius: 40px; z-index: 2100; 
+            text-align: center; width: 320px; border: 4px solid var(--pink-hot);
+        }
+
+        /* STRUK */
+        #struk-area { 
+            font-family: 'Courier New', monospace; text-align: left; font-size: 13px; 
+            padding: 20px; background: #fafafa; border-radius: 10px; margin-bottom: 20px; color: #333;
+        }
+
+        .char-head { font-size: 40px; text-align: center; margin-bottom: 10px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #struk-area, #struk-area * { visibility: visible; }
+            #struk-area { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav">
+    <button id="btn-p1" class="active" onclick="bukaHalaman(1)">🧁 MENU</button>
+    <button id="btn-p2" onclick="bukaHalaman(2)">📺 ANTREAN</button>
+</div>
+
+<div id="page1" class="page active-page">
+    <div class="char-head">🐱✨</div>
+    <h2>CAFE</h2>
+    
+    <table>
+        <thead>
+            <tr><th>Menu</th><th>Harga</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="tabel-menu"></tbody>
+    </table>
+
+    <div style="margin-top: 30px; background: #fffcfd; padding: 25px; border-radius: 30px; border: 2px solid var(--pink-pastel); text-align: center;">
+        <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Total Bayar</p>
+        <h1 style="margin: 5px 0; color: var(--pink-hot); font-size: 36px;">Rp <span id="total-bayar">0</span></h1>
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            <button class="btn btn-buy" onclick="prosesBayar('tunai')">💵 TUNAI</button>
+            <button class="btn" style="background:var(--pink-pastel); color:var(--pink-hot); box-shadow: 0 4px 0 #ffacbf;" onclick="prosesBayar('qris')">📱 QRIS</button>
+        </div>
+        <button class="btn btn-reset" style="margin-top: 15px; background: none;" onclick="resetTransaksi()">🔄 Reset Keranjang</button>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <h3>👩‍🍳 Kelola Menu</h3>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;">
+            <input type="text" id="new-nama" placeholder="Nama Menu" style="width: 130px;">
+            <input type="number" id="new-harga" placeholder="Harga" style="width: 90px;">
+            <input type="number" id="new-stok" placeholder="Stok" style="width: 70px;">
+            <button class="btn btn-owner" onclick="tambahMenu()">➕</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <h3>📢 Panggil Pelanggan</h3>
+        <input type="number" id="input-panggil" placeholder="No" style="width: 80px; text-align: center; font-size: 18px; font-weight: bold;">
+        <button class="btn btn-buy" onclick="panggilPesanan()">📢 PANGGIL!</button>
+    </div>
+</div>
+
+<div id="page2" class="page">
+    <div style="text-align: center;">
+        <div class="char-head">🐥</div>
+        <h2>ANTREAN</h2>
+        <div style="font-size: 120px; color: var(--pink-hot); font-weight: 800; margin: 20px 0; text-shadow: 4px 4px 0px var(--pink-pastel);" id="display-antrean">0</div>
+        <p style="color: #aaa; margin-bottom: 30px;">Silakan ambil pesanan jika nomor Anda muncul</p>
+        <button class="btn btn-buy" style="font-size: 18px; padding: 15px 40px;" onclick="ambilAntrean()">Ambil Antrean ✨</button>
+        <div style="margin-top: 40px;">
+            <button class="btn btn-reset" style="font-size: 11px;" onclick="resetAntrean()">⚠️ Reset Nomor</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay-qris" onclick="tutupModal('qris')"></div>
+<div id="modal-qris" class="modal">
+    <div style="font-size: 40px;">📱</div>
+    <h3>Pembayaran QRIS</h3>
+    <div style="background: white; padding: 10px; border-radius: 20px; display: inline-block; border: 2px solid #f0f0f0; margin: 10px 0;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=CAFE_PAYMENT" alt="QRIS" style="width: 180px;">
+    </div>
+    <p style="font-weight: bold; color: var(--pink-hot); font-size: 20px;" id="qris-total-text">Rp 0</p>
+    <button class="btn btn-buy" style="width: 100%;" onclick="tutupModal('qris'); tampilkanStruk();">SELESAI BAYAR</button>
+</div>
+
+<div class="overlay" id="overlay-struk"></div>
+<div id="modal-struk" class="modal">
+    <h3>✨ STRUK BELANJA ✨</h3>
+    <div id="struk-area">
+        <div style="text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+            <strong style="font-size: 18px;">CAFE</strong><br>
+            <span id="struk-tgl" style="font-size: 10px;"></span><br>
+            ---------------------------
+        </div>
+        <div id="struk-list"></div>
+        ---------------------------<br>
+        <div style="font-weight: bold; font-size: 15px; margin-top: 5px;">
+            TOTAL: <span style="float:right">Rp <span id="struk-total">0</span></span>
+        </div>
+        <div style="text-align: center; margin-top: 15px; font-size: 11px;">Terima kasih sudah mampir! 💖</div>
+    </div>
+    <button class="btn btn-buy no-print" style="width: 100%; margin-bottom: 10px;" onclick="window.print()">🖨️ CETAK STRUK</button>
+    <button class="btn no-print" style="width: 100%; background: #eee;" onclick="tutupModal('struk'); resetTransaksi();">TUTUP</button>
+</div>
+
+<script>
+    // Data Management
+    let menuCafe = JSON.parse(localStorage.getItem('menu_cafe_final')) || [
+        {nama: "Pinky Milk", harga: 18000, stok: 10},
+        {nama: "Cream Cake", harga: 25000, stok: 5}
+    ];
+    let keranjang = [];
+    let totalBelanja = 0;
+
+    function bukaHalaman(hal) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('page' + hal).classList.add('active-page');
+        document.getElementById('btn-p' + hal).classList.add('active');
+    }
+
+    function tampilkanMenu() {
+        let html = "";
+        menuCafe.forEach((item, index) => {
+            html += `<tr>
+                <td><strong>${item.nama}</strong><br><small style="color:#aaa">Stok: ${item.stok}</small></td>
+                <td>Rp ${item.harga.toLocaleString()}</td>
+                <td>
+                    <button class="btn ${item.stok <= 0 ? 'habis' : 'btn-buy'}" 
+                    onclick="tambahKeKeranjang(${index})" ${item.stok <= 0 ? 'disabled' : ''}>+</button>
+                    <button class="btn" style="background:none; color:#ffc2d1; margin-left:5px;" onclick="hapusMenu(${index})">✕</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('tabel-menu').innerHTML = html;
+        localStorage.setItem('menu_cafe_final', JSON.stringify(menuCafe));
+    }
+
+    function tambahMenu() {
+        let n = document.getElementById('new-nama').value;
+        let h = parseInt(document.getElementById('new-harga').value);
+        let s = parseInt(document.getElementById('new-stok').value);
+        if(n && h && !isNaN(s)) {
+            menuCafe.push({nama: n, harga: h, stok: s});
+            tampilkanMenu();
+            document.getElementById('new-nama').value = "";
+            document.getElementById('new-harga').value = "";
+            document.getElementById('new-stok').value = "";
+        }
+    }
+
+    function hapusMenu(i) {
+        if(confirm("Hapus menu ini?")) { menuCafe.splice(i, 1); tampilkanMenu(); }
+    }
+
+    function tambahKeKeranjang(i) {
+        if(menuCafe[i].stok > 0) {
+            menuCafe[i].stok--;
+            totalBelanja += menuCafe[i].harga;
+            let ada = keranjang.find(k => k.nama === menuCafe[i].nama);
+            if(ada) { ada.qty++; } else { keranjang.push({nama: menuCafe[i].nama, harga: menuCafe[i].harga, qty: 1}); }
+            document.getElementById('total-bayar').innerText = totalBelanja.toLocaleString();
+            tampilkanMenu();
+        }
+    }
+
+    function prosesBayar(m) {
+        if(totalBelanja === 0) return alert("Pilih menu dulu!");
+        if(m === 'qris') {
+            document.getElementById('qris-total-text').innerText = "Rp " + totalBelanja.toLocaleString();
+            document.getElementById('overlay-qris').style.display = 'block';
+            document.getElementById('modal-qris').style.display = 'block';
+        } else {
+            tampilkanStruk();
+        }
+    }
+
+    function tampilkanStruk() {
+        let list = "";
+        keranjang.forEach(k => { 
+            list += `<div style="margin-bottom:5px;">${k.nama} x${k.qty} <span style="float:right">Rp ${(k.harga * k.qty).toLocaleString()}</span></div>`; 
+        });
+        document.getElementById('struk-tgl').innerText = new Date().toLocaleString('id-ID');
+        document.getElementById('struk-list').innerHTML = list;
+        document.getElementById('struk-total').innerText = totalBelanja.toLocaleString();
+        document.getElementById('modal-struk').style.display = 'block';
+        document.getElementById('overlay-struk').style.display = 'block';
+    }
+
+    function tutupModal(t) {
+        document.getElementById('modal-' + t).style.display = 'none';
+        document.getElementById('overlay-' + t).style.display = 'none';
+    }
+
+    function resetTransaksi() {
+        totalBelanja = 0; keranjang = [];
+        document.getElementById('total-bayar').innerText = "0";
+        tampilkanMenu();
+    }
+
+    function ambilAntrean() {
+        let n = (parseInt(localStorage.getItem('no_antrean')) || 0) + 1;
+        localStorage.setItem('no_antrean', n);
+        alert("Nomor Antrean Anda: " + n);
+    }
+
+    function resetAntrean() {
+        if(confirm("Reset nomor antrean?")) {
+            localStorage.setItem('no_antrean', 0);
+            localStorage.setItem('panggil_nomor', 0);
+            document.getElementById('display-antrean').innerText = 0;
+        }
+    }
+
+    function panggilPesanan() {
+        let n = document.getElementById('input-panggil').value;
+        if(!n) return;
+        localStorage.setItem('panggil_nomor', n);
+        let s = new SpeechSynthesisUtterance(`Pesanan nomor ${n} sudah siap! Oh asmara, silakan diambil di meja kasir ya!`);
+        s.lang = 'id-ID'; s.pitch = 1.8; s.rate = 1.1;
+        window.speechSynthesis.speak(s);
+    }
+
+    setInterval(() => {
+        let panggil = localStorage.getItem('panggil_nomor') || 0;
+        if(document.getElementById('page2').classList.contains('active-page')) {
+            document.getElementById('display-antrean').innerText = panggil;
+        }
+    }, 1000);
+
+    tampilkanMenu();
+</script>
+</body>
+</html>
